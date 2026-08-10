@@ -1,42 +1,25 @@
 # Logic System Lab
 
-國立成功大學電機工程學系 **Logic System Lab** 學習、複習與實作紀錄。
+國立成功大學電機工程學系 **邏輯系統實驗 (Logic System Lab)** 的學習、複習與實作紀錄。
 
-本 repository 主要整理課程中的 Verilog、Digital Logic Design、Simulation 與 FPGA 實作內容。
+本 repository 整理課程中的 **Digital Logic Design、Verilog、Simulation 與 FPGA** 實作內容，並重新完成部分 Lab 與額外 Project。
 
-除了重新完成原本 Lab 的設計外，也會加入額外的小型 Project，練習從 Specification 出發，自行完成：
+重點不只是保存原本的課程作業，而是重新建立一套完整的 Digital Hardware Design workflow：
 
 > **Specification → Architecture → Verilog → Testbench → Simulation → Waveform Verification → Debug → FPGA Implementation**
 
-目標不是單純保存作業，而是建立完整且可獨立完成的 Digital Hardware Design workflow。
-
 ---
 
-## Course Overview
+## Course Information
 
-整門課從基本的 Combinational Logic 開始，逐步進入 Sequential Circuit、RTL Design、Verification 與 FPGA Application。
-
-```text
-Combinational Logic
-        │
-        ▼
-Mux / Demux / Encoder / Decoder / Adder
-        │
-        ▼
-Sequential Circuit
-        │
-        ▼
-Flip-Flop / Register / Counter / Clock
-        │
-        ▼
-RTL System Design
-        │
-        ▼
-Timer / Button / PWM / LFSR
-        │
-        ▼
-FPGA Application & System Integration
-```
+| Item | Information |
+|---|---|
+| Course | 邏輯系統實驗 (Logic System Lab) |
+| Semester | 2026 Spring |
+| Instructor | 陳中和 |
+| Department | 國立成功大學 電機工程學系 |
+| Language | Verilog |
+| FPGA Board | PYNQ-Z2 |
 
 ---
 
@@ -44,29 +27,86 @@ FPGA Application & System Integration
 
 | Lab | Topic | 主要內容 |
 |---|---|---|
-| [Lab 1](./lab1) | **Mux & Demux** | Logic Gate、Universal Gate、Mux、Demux、Gate Level / Behavioral Level、Hierarchical Design、Basic Testbench |
-| Lab 2 | **Encoder & Decoder** | Encoder、Decoder、7-Segment Display、IC Design Flow、FPGA、LUT |
-| Lab 3 | **Adder** | Half Adder、Full Adder、Ripple Carry Adder、Carry Lookahead Adder、Signed Addition、Subtraction |
-| Lab 4 | **Sequential Circuits + Testbench** | Combinational vs Sequential Circuit、Latch、Flip-Flop、Register、Counter、Clock、Testbench |
-| Lab 5 | **LED & Button** | RTL Design、Always Block、Blocking / Non-blocking、Application Circuit、LED、Button |
-| Lab 6 | **LED & PWM** | Sequential System Review、Timer、LED Control、PWM |
-| Lab 7 | **Whack-A-Mole & LFSR** | Pseudo-Randomness、LFSR、Random Timing、Pre-Simulation、System Integration |
-| Lab 8 | **Dot-Matrix Display** | 8×8 Dot-Matrix、Matrix Scanning、Frequency Divider、Display Control、3-Lane Car Runner Game |
+| [Lab 01](./lab1) | **Mux & Demux** | Logic Gate、Universal Gate、Mux、Demux、Gate Level / Behavioral Level、Hierarchical Design、Testbench |
+| Lab 02 | **Encoder & Decoder** | Encoder、Decoder、7-Segment Display、FPGA、LUT、IC Design Flow |
+| Lab 03 | **Adder** | Half Adder、Full Adder、Ripple Carry Adder、Carry Lookahead Adder、Signed Addition、Subtraction |
+| Lab 04 | **Sequential Circuits + Testbench** | Combinational / Sequential Circuit、Latch、Flip-Flop、Register、Counter、Clock、Testbench |
+| Lab 05 | **LED & Button** | RTL Design、Always Block、Blocking / Non-blocking、LED / Button Application |
+| Lab 06 | **LED & PWM** | Timer、Application Circuit、LED Control、PWM |
+| Lab 07 | **Whack-A-Mole & LFSR** | LFSR、Pseudo-Randomness、Random Timing、Pre-Simulation、System Integration |
+| Lab 08 | **Dot-Matrix Display** | 8×8 Dot-Matrix、Matrix Scanning、Frequency Divider、Display Control、3-Lane Car Runner Game |
 
 ---
 
-## Repository Status
+## Review Progress
 
 | Lab | Status |
 |---|---|
-| Lab 1 — Mux & Demux | ✅ Completed |
-| Lab 2 — Encoder & Decoder | 🔄 Reviewing |
-| Lab 3 — Adder | ⏳ |
-| Lab 4 — Sequential Circuits + Testbench | ⏳ |
-| Lab 5 — LED & Button | ⏳ |
-| Lab 6 — LED & PWM | ⏳ |
-| Lab 7 — Whack-A-Mole & LFSR | ⏳ |
-| Lab 8 — Dot-Matrix Display | ⏳ |
+| Lab 01 — Mux & Demux | ✅ Completed |
+| Lab 02 — Encoder & Decoder | 🔄 Reviewing |
+| Lab 03 — Adder | ⏳ |
+| Lab 04 — Sequential Circuits + Testbench | ⏳ |
+| Lab 05 — LED & Button | ⏳ |
+| Lab 06 — LED & PWM | ⏳ |
+| Lab 07 — Whack-A-Mole & LFSR | ⏳ |
+| Lab 08 — Dot-Matrix Display | ⏳ |
+
+---
+
+## Design Workflow
+
+重新複習每個 Lab 時，主要依照以下流程完成設計與驗證：
+
+```text
+Specification
+      │
+      ▼
+Architecture / Module Decomposition
+      │
+      ▼
+Verilog Implementation
+      │
+      ▼
+Testbench
+      │
+      ▼
+Pre-Simulation
+      │
+      ▼
+Waveform Verification
+      │
+      ▼
+Debug & Re-Verification
+      │
+      ▼
+FPGA Implementation
+```
+
+### Design
+
+根據 Specification 確認：
+
+- Input / Output
+- Functional Requirement
+- Signal Width
+- Module Interface
+- Module Hierarchy
+- Combinational / Sequential Behavior
+
+再將系統拆分成適當的 hardware modules 並完成 Verilog implementation。
+
+### Verification
+
+完成設計後撰寫 Testbench，透過 simulation 與 waveform 確認：
+
+- Input stimulus 是否正確
+- Output 是否符合 Specification
+- Internal signal 是否符合預期
+- Module connection 是否正確
+- 是否出現非預期的 `X` / `Z`
+- Clock / Reset behavior 是否正確
+
+若結果錯誤，根據 waveform 定位問題並重新驗證，而不是只以 compile 或 synthesis 成功作為完成標準。
 
 ---
 
@@ -75,7 +115,7 @@ FPGA Application & System Integration
 ### Software
 
 - **AMD Vivado**
-  - Verilog design
+  - Verilog Design
   - Behavioral Simulation
   - Synthesis
   - Implementation
@@ -85,22 +125,22 @@ FPGA Application & System Integration
   - Verilog source code editing
 
 - **Git / GitHub**
-  - Version control
-  - Lab documentation
-  - Source code management
+  - Version Control
+  - Source Code Management
+  - Documentation
 
 ### Hardware
 
 - **PYNQ-Z2 FPGA**
 
-部分複習內容以 simulation 為主要驗證方式；需要 FPGA 的內容則依實際硬體環境進行實作。
+部分複習內容以 simulation 為主要驗證方式；需要實機的內容則視 FPGA 硬體環境進行 implementation 與 verification。
 
 ---
 
 ## Repository Structure
 
 ```text
-Logic_System_Lab/
+ncku-logic-system-lab/
 │
 ├── README.md
 │
@@ -111,249 +151,53 @@ Logic_System_Lab/
 │   └── project/
 │
 ├── lab2/
-│   └── README.md
-│
 ├── lab3/
-│   └── README.md
-│
 ├── lab4/
-│   └── README.md
-│
 ├── lab5/
-│   └── README.md
-│
 ├── lab6/
-│   └── README.md
-│
 ├── lab7/
-│   └── README.md
-│
 └── lab8/
-    └── README.md
 ```
 
-各 Lab 依實際內容可能包含：
+各 Lab 依實際內容保存：
 
-```text
-README.md
-*.v
-testbench
-waveform
-*.xdc
-images
-project/
-```
-
-每個 Lab 的詳細 Specification、設計架構、實作內容與驗證結果會記錄於各自的 `README.md`。
-
----
-
-## Design Workflow
-
-### 1. Specification
-
-先確認：
-
-- Input / Output
-- Functional Requirement
-- Timing Requirement
-- Module Requirement
-- Special Constraints
-
----
-
-### 2. Architecture Design
-
-根據 Specification 將系統拆分成適當的 hardware modules，並確認：
-
-- 每個 module 負責的功能
-- Module interface
-- Signal width
-- Module hierarchy
-- Data flow
-
----
-
-### 3. Verilog Implementation
-
-依電路需求使用：
-
-- Gate Level
-- Continuous Assignment
-- Behavioral Level
-- Always Block
-- Module Instantiation
-- Hierarchical Design
-
-完成 RTL / logic implementation。
-
----
-
-### 4. Testbench
-
-為主要 module 或 top module 建立 Testbench，設計足以涵蓋重要功能與 corner cases 的 input stimulus。
-
----
-
-### 5. Pre-Simulation
-
-在進行 synthesis 或 FPGA implementation 前，先確認 behavioral simulation 的功能正確。
-
-主要檢查：
-
-- Input stimulus 是否符合預期
-- Output 是否正確
-- Timing / Clock behavior 是否合理
-- 是否出現非預期的 `X` / `Z`
-- Module 之間的 signal connection 是否正確
-
----
-
-### 6. Waveform Verification
-
-不只確認 simulation 能執行，而是實際根據 waveform：
-
-```text
-Input
-  ↓
-Internal Signal
-  ↓
-State / Data Processing
-  ↓
-Output
-```
-
-逐段驗證 hardware behavior。
-
----
-
-### 7. Debug
-
-若結果不符合預期，依序檢查：
-
-- Specification interpretation
-- Boolean logic
-- Signal width
-- Port connection
-- Module hierarchy
-- Combinational / Sequential behavior
-- Blocking / Non-blocking assignment
-- Clock / Reset
-- Testbench stimulus
-
----
-
-### 8. FPGA Implementation
-
-需要實機驗證的 Lab 會進一步執行：
-
-```text
-Verilog Design
-      ↓
-Pre-Simulation
-      ↓
-Synthesis
-      ↓
-Implementation
-      ↓
-Generate Bitstream
-      ↓
-Program FPGA
-      ↓
-Hardware Verification
-```
-
----
-
-## Main Topics
-
-### Combinational Logic
-
-- Logic Gate
-- Boolean Logic
-- NAND / NOR Universal Gate
-- Multiplexer
-- Demultiplexer
-- Encoder
-- Decoder
-- Half Adder
-- Full Adder
-- Ripple Carry Adder
-- Carry Lookahead Adder
-- Comparator
-
----
-
-### Sequential Logic
-
-- Latch
-- Flip-Flop
-- Register
-- Counter
-- Clock
-- Reset
-- Timer
-- Synchronous System
-
----
-
-### Verilog / RTL
-
-- Module
-- Port
-- Wire / Reg
-- Vector
-- Bit Select / Part Select
-- Continuous Assignment
-- Gate Primitive
-- Always Block
-- Blocking Assignment
-- Non-blocking Assignment
-- Case / If-Else
-- Module Instantiation
-- Hierarchical Design
-
----
-
-### Verification
-
+- Verilog design files
 - Testbench
-- Input Stimulus
-- Behavioral Simulation
-- Pre-Simulation
-- Waveform Analysis
-- Functional Verification
-- Debugging
+- Simulation results
+- Waveform screenshots
+- FPGA constraint files (`.xdc`)
+- Design / Architecture 說明
+- Additional Project
 
----
-
-### FPGA
-
-- FPGA Design Flow
-- LUT
-- Constraint File
-- Synthesis
-- Implementation
-- Bitstream
-- PYNQ-Z2
-- LED
-- Button
-- 7-Segment Display
-- PWM
-- LFSR
-- Dot-Matrix Display
+詳細的設計與驗證紀錄會整理在各 Lab 的 `README.md`。
 
 ---
 
 ## Additional Projects
 
-除了課程原本的 Practice 外，我也會在部分 Lab 加入額外的小型 Project，作為該階段的能力驗收。
+除了原本課程的 Practice 外，部分 Lab 會加入額外的小型 Project，使用該 Lab 學到的核心概念完成新的 Specification。
 
-這些 Project 不以重複原題為目的，而是使用相同的核心知識完成新的 Specification。
+目的在於確認能否脫離原本題目，獨立完成：
 
-### Lab 1
+```text
+Read Specification
+        ↓
+Design Architecture
+        ↓
+Decompose Modules
+        ↓
+Implement Verilog
+        ↓
+Write Testbench
+        ↓
+Verify Waveform
+        ↓
+Debug
+```
 
-**Programmable Bit Router**
+### Lab 01 — Programmable Bit Router
+
+使用 Lab 01 的 Mux、Demux、Combinational Logic 與 Hierarchical Design 完成一個可程式化的 bit routing system。
 
 ```text
 src[7:0]
@@ -375,58 +219,17 @@ Demux_1to8
 dst[7:0]
 ```
 
-練習內容：
-
-- Module Decomposition
-- Mux / Demux
-- Combinational Logic
-- Hierarchical Design
-- Testbench
-- Waveform Verification
-
-詳細內容請見：
-
-[Lab 1](./lab1)
+詳細內容請見 [Lab 01](./lab1)。
 
 ---
 
 ## Learning Goal
 
-這次重新整理 Logic System Lab 的主要目的，是從原本「完成作業」進一步提升成能夠獨立完成 Digital Hardware Design。
+這次重新整理課程的主要目標，是從「能完成 Lab」進一步提升成能夠獨立完成 Digital Hardware Design：
 
-希望最後能穩定做到：
+> **看懂 Specification → 自行拆 Module → 寫 Verilog → 寫 Testbench → 看 Waveform → Debug → 完成 System Integration**
 
-```text
-看到 Specification
-        ↓
-理解 Hardware Behavior
-        ↓
-自行拆 Module
-        ↓
-設計 Interface
-        ↓
-撰寫 Verilog
-        ↓
-撰寫 Testbench
-        ↓
-分析 Waveform
-        ↓
-找到 Bug
-        ↓
-修改並重新驗證
-        ↓
-完成 System Integration
-```
-
-並將這些能力作為後續學習：
-
-- Computer Organization
-- VLSI Design
-- RTL Design
-- Digital IC Design
-- FPGA Design
-
-的基礎。
+並以這些能力作為後續學習 **Computer Organization、RTL Design、VLSI Design、Digital IC Design 與 FPGA Design** 的基礎。
 
 ---
 
@@ -434,6 +237,6 @@ dst[7:0]
 
 本 repository 主要保存自行撰寫、重新實作與整理的學習成果。
 
-課程官方講義、完整原始作業文件、原始報告，以及其他非自行撰寫的教材不收錄於此 repository。
+課程官方講義、原始完整結報、TA 提供的程式碼，以及其他非自行撰寫的教材不收錄於此 repository。
 
-部分內容源自課程 Lab 的 Specification，但程式碼、Testbench、整理與額外 Project 以自行重新實作的版本為主。
+部分實作基於課程 Lab 的 Specification，程式碼、Testbench、驗證紀錄與 Additional Project 則以自行重新實作的版本為主。
