@@ -1,10 +1,8 @@
 # Logic System Lab
 
-本 repository 用來記錄 **Logic System Lab** 的學習、複習與實作成果。
+本 repository 用來記錄 **Logic System Lab** 的成果與額外練習。
 
 課程內容以 **Verilog、Digital Logic Design 與 FPGA** 為主，從基礎的 combinational circuit 開始，逐步進入 sequential circuit、RTL design、testbench、simulation，以及較完整的 FPGA application。
-
-除了重新整理原本課程中的 Lab，我也會加入額外的小型 Project，練習從 Specification 出發，獨立完成 hardware architecture、Verilog implementation 與 verification。
 
 ---
 
@@ -76,10 +74,6 @@ Debug
 FPGA Implementation
 ```
 
-重點不只是讓程式能夠 compile，而是確認自己能夠從功能需求開始，逐步設計出正確的硬體架構，並透過 simulation 驗證設計。
-
----
-
 ## Main Topics
 
 ### Combinational Logic
@@ -144,39 +138,6 @@ FPGA Implementation
 - **Visual Studio Code**
 - **Git**
 - **GitHub**
-
----
-
-## Additional Projects
-
-除了原本 Lab 的 Practice 外，也會加入額外的小型 Project，作為各階段的能力驗收。
-
-這些 Project 主要練習：
-
-- 閱讀 Specification
-- Hardware Architecture Design
-- Module Decomposition
-- Module Interface Design
-- Verilog Implementation
-- Hierarchical Design
-- Testbench Development
-- Simulation
-- Waveform Verification
-- Debugging
-
-額外 Project 會放在對應 Lab 的 `project/` 資料夾中。
-
----
-
-## Goal
-
-這份 repository 不只是保存課堂作業，而是重新建立完整的 Digital Hardware Design 能力。
-
-希望能逐步做到：
-
-> **看懂 Specification → 自行拆解 Hardware Modules → 撰寫 Verilog → 建立 Testbench → 分析 Waveform → Debug → 完成 System Integration**
-
-並以此作為後續學習 Computer Organization、VLSI、Digital IC Design 與更大型 RTL Project 的基礎。
 
 ---
 
