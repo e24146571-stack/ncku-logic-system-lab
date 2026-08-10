@@ -112,42 +112,6 @@ v2 不只使用較少的 hardware area，在此分析條件下也具有較小的
 
 ## Practice
 
-課程原本共有四個 Practice。
-
-### Practice 1 — Tinkercad Mux / Demux
-
-使用 Tinkercad 建立：
-
-```text
-4:1 Mux + 1:4 Demux System
-```
-
-主要練習從 Gate-Level circuit 實際建立完整的 Mux / Demux routing system。
-
-### Practice 2 — Universal Gate
-
-使用 Tinkercad 分別只利用：
-
-```text
-NAND
-```
-
-以及：
-
-```text
-NOR
-```
-
-實作：
-
-```text
-AND / OR / XOR / NOT
-```
-
-本 repository 主要保留後續重新完成的 Verilog Practice，因此 P1、P2 不另外保存原始課程檔案。
-
----
-
 ## Practice 3 — 4:1 Mux + 1:4 Demux
 
 [查看 Practice 3](./P3)
@@ -208,8 +172,6 @@ P3/
 └── tb_top_4.v
 ```
 
-複習時分別對主要 module 與完整 `top_4` 撰寫 Testbench，並透過 waveform 驗證 Mux selection、Demux routing 與完整 system connection。
-
 ---
 
 ## Practice 4 — 8:1 Mux + 1:8 Demux
@@ -253,7 +215,6 @@ P4/
 
 [查看 Programmable Bit Router](./project)
 
-完成原本 Lab 後，另外設計一個小型 Project 作為 Lab 01 的能力驗收。
 
 系統除了 Mux / Demux 外，再加入 `enable` 與 `invert` control：
 
@@ -327,18 +288,3 @@ lab1/
     └── tb_top_router.v
 ```
 
----
-
-## Key Takeaways
-
-完成 Lab 01 後，主要建立以下能力：
-
-- 從 truth table 與 Boolean Logic 理解 combinational circuit
-- 理解 NAND / NOR 的 Functional Completeness
-- 理解 Mux 與 Demux 的 selection / routing behavior
-- 比較不同 hardware architecture 的 Area / Speed trade-off
-- 使用 Gate Level 與 Behavioral Level 描述 combinational logic
-- 使用 Vector 與 Module Instantiation 建立較大的 circuit
-- 使用 Hierarchical Design 將小 module 組合成完整 system
-- 撰寫 Testbench 並從 Waveform 驗證設計
-- 從新的 Specification 自行拆解並完成小型 Digital Hardware Project
