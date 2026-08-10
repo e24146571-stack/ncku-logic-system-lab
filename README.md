@@ -1,6 +1,10 @@
 # Logic System Lab
 
-本 repository 整理課程中的 **Digital Logic Design、Verilog、Simulation 與 FPGA** 實作內容與額外練習。
+本 repository 整理 **邏輯系統實驗 (Logic System Lab)** 的 Verilog、Simulation、FPGA 實作與額外練習。
+
+主要內容涵蓋：
+
+> **Digital Logic Design → Verilog → Testbench → Simulation → FPGA**
 
 ---
 
@@ -21,7 +25,7 @@
 
 | Lab | Topic | 主要內容 |
 |---|---|---|
-| [Lab 01](./lab1) | **Mux & Demux** | Logic Gate、Universal Gate、Mux、Demux、Gate Level / Behavioral Level、Hierarchical Design、Testbench |
+| [Lab 01](./lab01) | **Mux & Demux** | Logic Gate、Universal Gate、Mux、Demux、Gate Level / Behavioral Level、Hierarchical Design、Testbench |
 | Lab 02 | **Encoder & Decoder** | Encoder、Decoder、7-Segment Display、FPGA、LUT、IC Design Flow |
 | Lab 03 | **Adder** | Half Adder、Full Adder、Ripple Carry Adder、Carry Lookahead Adder、Signed Addition、Subtraction |
 | Lab 04 | **Sequential Circuits + Testbench** | Combinational / Sequential Circuit、Latch、Flip-Flop、Register、Counter、Clock、Testbench |
@@ -29,6 +33,8 @@
 | Lab 06 | **LED & PWM** | Timer、Application Circuit、LED Control、PWM |
 | Lab 07 | **Whack-A-Mole & LFSR** | LFSR、Pseudo-Randomness、Random Timing、Pre-Simulation、System Integration |
 | Lab 08 | **Dot-Matrix Display** | 8×8 Dot-Matrix、Matrix Scanning、Frequency Divider、Display Control、3-Lane Car Runner Game |
+
+> 已完成整理的 Lab 會加入對應 repository link。
 
 ---
 
@@ -59,37 +65,33 @@
 
 ## Repository Structure
 
+目前已整理的內容：
+
 ```text
 ncku-logic-system-lab/
 │
 ├── README.md
 │
-├── lab1/
-│   ├── README.md
-│   ├── P3/
-│   ├── P4/
-│   └── project/
-│
-├── lab2/
-├── lab3/
-├── lab4/
-├── lab5/
-├── lab6/
-├── lab7/
-└── lab8/
+└── lab01/
+    ├── README.md
+    ├── example/
+    ├── images/
+    ├── practice3/
+    ├── practice4/
+    └── project/
 ```
 
 各 Lab 依實際內容保存：
 
 - Verilog design files
 - Testbench
-- Simulation results
-- Waveform screenshots
-- FPGA constraint files (`.xdc`)
-- Design / Architecture 說明
+- Simulation waveform
+- Circuit / Architecture diagrams
+- FPGA constraint files (`.xdc`) when applicable
+- Design and verification notes
 - Additional Project
 
-詳細的設計與驗證紀錄會整理在各 Lab 的 `README.md`。
+詳細設計、程式碼與驗證紀錄請見各 Lab 的 `README.md`。
 
 ---
 
@@ -97,7 +99,7 @@ ncku-logic-system-lab/
 
 ### Lab 01 — Programmable Bit Router
 
-使用 Lab 01 的 Mux、Demux、Combinational Logic 與 Hierarchical Design 完成一個可程式化的 bit routing system。
+在 Lab 01 的 Mux、Demux 與 Hierarchical Design 基礎上，額外完成一個 **8-source to 8-destination programmable bit router**。
 
 ```text
 src[7:0]
@@ -119,13 +121,19 @@ Demux_1to8
 dst[7:0]
 ```
 
-詳細內容請見 [Lab 01](./lab1)。
+除了 source / destination selection 外，系統另外加入：
+
+- `enable` — 控制訊號是否輸出
+- `invert` — 控制 selected bit 是否反相
+
+詳細內容請見 [Programmable Bit Router](./lab01/project)。
 
 ---
 
 ## Note
 
-本 repository 主要保存自行撰寫、重新實作與整理的學習成果。
+本 repository 主要用於保存自行重新實作、整理與驗證的學習成果。
 
-課程官方講義、原始完整結報、TA 提供的程式碼，以及其他非自行撰寫的教材不收錄於此 repository。
+課程官方講義、原始完整結報及其他完整課程教材不收錄於此 repository。
 
+部分基礎 Verilog examples 依課堂內容重新整理，用於記錄不同描述方式與 hierarchical design 的基本概念。
