@@ -1,8 +1,6 @@
 # Lab 01 — Mux & Demux
 
-本 Lab 為 Logic System Lab 的第一個實驗，從基本 Logic Gate 開始，進一步建立 Mux / Demux 的 combinational circuit，並開始使用 Verilog 描述與驗證 Digital Logic。
-
-主要練習從 Boolean Logic 與 Gate-Level circuit 出發，逐步進入：
+本 Lab 從基本 **Logic Gate** 出發，進一步建立 Mux / Demux combinational circuit，並開始使用 Verilog 描述、組合與驗證 Digital Logic。
 
 > **Logic Gate → Mux / Demux → Hierarchical Design → Verilog → Testbench → Simulation**
 
@@ -10,45 +8,81 @@
 
 ## Topics
 
-- Logic Gate
-  - AND / OR / XOR / NOT
-  - NAND / NOR
-- Functional Completeness
-- Universal Gate
-- Multiplexer (Mux)
-- Demultiplexer (Demux)
-- Gate-Level Circuit
-- Hierarchical Design
-- Area / Speed Comparison
-- Critical Path
-- Basic Logical Effort
-- TTL Noise Margin
-- Verilog
-  - Gate Level
-  - Behavioral Level
-  - Vector
-  - Wire
-  - Continuous Assignment
-  - Module Instantiation
-- Testbench
-- Waveform Verification
+| Category | Topics |
+|---|---|
+| Logic | Logic Gate、Functional Completeness、Universal Gate |
+| Circuit | Multiplexer、Demultiplexer、Gate-Level Circuit |
+| Design | Hierarchical Design、Area / Speed Comparison、Critical Path、Logical Effort |
+| Verilog | Gate Level、Behavioral Level、Vector、Wire、Continuous Assignment、Module Instantiation |
+| Verification | Testbench、Simulation、Waveform Verification |
 
 ---
 
 ## Logic Gate & Universal Gate
 
-課程前半部從基本 Logic Gate 的功能開始，並利用不同 control value 觀察：
+課程前半部先從 Logic Gate 的控制行為開始：
 
-- AND：Block / Clear 或 Pass
-- OR：Keep 或 Set
-- XOR：Keep 或 Toggle
+- **AND**：Block / Clear 或 Pass
+- **OR**：Keep 或 Set
+- **XOR**：Keep 或 Toggle
 
-接著利用 **Functional Completeness** 的概念，練習只使用：
+接著利用 **Functional Completeness** 的概念，練習只使用 NAND 或 NOR 建構其他基本 Logic Gates，理解 NAND 與 NOR 作為 Universal Gate 的特性。
 
-- NAND
-- NOR
+<details>
+<summary><b>Universal Gate Implementations</b></summary>
 
-實作 AND、OR、XOR 與 NOT，理解 NAND 與 NOR 作為 Universal Gate 的特性。
+<br>
+
+### NAND
+
+<table>
+<tr>
+<td align="center">
+<b>OR by NAND</b><br><br>
+<a href="./images/q2_nand_or.png">
+<img src="./images/q2_nand_or.png" width="100%">
+</a>
+</td>
+
+<td align="center">
+<b>XOR by NAND</b><br><br>
+<a href="./images/q2_nand_xor.png">
+<img src="./images/q2_nand_xor.png" width="100%">
+</a>
+</td>
+</tr>
+</table>
+
+### NOR
+
+<table>
+<tr>
+<td align="center">
+<b>NOT by NOR</b><br><br>
+<a href="./images/q2_nor_not.png">
+<img src="./images/q2_nor_not.png" width="100%">
+</a>
+</td>
+
+<td align="center">
+<b>OR by NOR</b><br><br>
+<a href="./images/q2_nor_or.png">
+<img src="./images/q2_nor_or.png" width="100%">
+</a>
+</td>
+</tr>
+
+<tr>
+<td align="center" colspan="2">
+<b>AND by NOR</b><br><br>
+<a href="./images/q2_nor_and.png">
+<img src="./images/q2_nor_and.png" width="55%">
+</a>
+</td>
+</tr>
+</table>
+
+</details>
 
 ---
 
@@ -72,51 +106,99 @@ Demux
 dst
 ```
 
-Mux 根據 `src_sel` 從多個 source 中選出一個訊號送入 `channel`。
+**Mux** 根據 `src_sel`，從多個 source 中選出一個訊號送入 `channel`。
 
-Demux 則根據 `dst_sel` 將 `channel` 導向指定的 destination。
+**Demux** 則根據 `dst_sel`，將 `channel` 導向指定的 destination。
 
 ---
 
 ## Architecture Comparison
 
-課程中分別使用兩種 architecture 實作 4:1 Mux 與 1:4 Demux，並比較不同電路結構的 Area 與 Speed。
+課程中分別使用兩種 architecture 實作 **4:1 Mux** 與 **1:4 Demux**，並進一步比較不同 circuit structure 的 Area 與 Speed。
+
+> 點擊圖片可查看完整尺寸。
 
 ### 4:1 Mux
 
-- **v1**：直接利用 selection condition、AND 與 OR 建構
-- **v2**：以多層 2:1 Mux 組成 hierarchical structure
+#### v1 — Direct Gate-Level Implementation
+
+直接利用 `src_sel[1:0]` 與其反相信號產生四組 selection condition，再透過 AND / OR gate 選出對應的 source。
+
+#### v2 — Hierarchical Implementation
+
+將 4:1 Mux 拆成多個 2:1 Mux，以兩層 selection structure 完成資料選擇。
+
+<table>
+<tr>
+<td align="center">
+<b>Mux v1</b><br><br>
+<a href="./images/q3_mux_v1.png">
+<img src="./images/q3_mux_v1.png" width="100%">
+</a>
+</td>
+
+<td align="center">
+<b>Mux v2</b><br><br>
+<a href="./images/q3_mux_v2.png">
+<img src="./images/q3_mux_v2.png" width="100%">
+</a>
+</td>
+</tr>
+</table>
 
 | Design | Area | Estimated Delay |
 |---|---:|---:|
 | Mux v1 | 70 | ≈ 28.64 |
 | Mux v2 | 58 | ≈ 28.64 |
 
-在此分析條件下，兩種 architecture 的 estimated delay 相同，但 v2 使用較少的 hardware area。
+在此分析條件下，兩種 architecture 的 estimated delay 相同，但 **v2 使用較少的 hardware area**。
+
+---
 
 ### 1:4 Demux
 
-- **v1**：直接產生四組 selection condition 並控制四個 output
-- **v2**：以兩層 1:2 Demux 建構 hierarchical structure
+#### v1 — Direct Gate-Level Implementation
+
+利用 `dst_sel[1:0]` 與其反相信號產生四組 selection condition，再將 `channel` 導向對應的 destination。
+
+#### v2 — Hierarchical Implementation
+
+將 1:4 Demux 拆成多個 1:2 Demux，以兩層 routing structure 將 `channel` 導向指定 destination。
+
+<table>
+<tr>
+<td align="center">
+<b>Demux v1</b><br><br>
+<a href="./images/q3_demux_v1.png">
+<img src="./images/q3_demux_v1.png" width="100%">
+</a>
+</td>
+
+<td align="center">
+<b>Demux v2</b><br><br>
+<a href="./images/q3_demux_v2.png">
+<img src="./images/q3_demux_v2.png" width="100%">
+</a>
+</td>
+</tr>
+</table>
 
 | Design | Area | Estimated Delay |
 |---|---:|---:|
 | Demux v1 | 52 | ≈ 18.03 |
 | Demux v2 | 40 | ≈ 17.07 |
 
-v2 不只使用較少的 hardware area，在此分析條件下也具有較小的 estimated delay。
+在此分析條件下，**v2 同時具有較小的 hardware area 與 estimated delay**。
 
-> 此處 Area 依 Lab Appendix 以 transistor count 估算；Speed 則根據 Critical Path 與 Logical Effort 進行比較。
+> Area 依 Lab Appendix 以 transistor count 估算；Speed 則根據 Critical Path 與 Logical Effort 進行比較。
 
 ---
 
-## Practice
-
 ## Practice 3 — 4:1 Mux + 1:4 Demux
 
-[查看 Practice 3](./P3)
+[查看 Practice 3](./practice3)
 
-使用 Verilog 建立：
+使用 Verilog 建立完整的 4-source / 4-destination routing system：
 
 ```text
 src[3:0]
@@ -133,7 +215,7 @@ CB_Demux_1to4
 dst[3:0]
 ```
 
-### Design
+### Design Structure
 
 Mux 使用 **Gate Level** 實作：
 
@@ -151,18 +233,12 @@ CB_Demux_1to4
       └── Demux_1to2
 ```
 
-最後由：
-
-```text
-top_4
-```
-
-整合 Mux 與 Demux。
+最後由 `top_4` 整合 Mux 與 Demux。
 
 ### Files
 
 ```text
-P3/
+practice3/
 ├── GL_Mux_4to1.v
 ├── Demux_1to2.v
 ├── CB_Demux_1to4.v
@@ -172,13 +248,15 @@ P3/
 └── tb_top_4.v
 ```
 
+除了完整 system simulation 外，也分別對主要 module 撰寫 Testbench，以 waveform 驗證 selection、routing 與 module connection。
+
 ---
 
 ## Practice 4 — 8:1 Mux + 1:8 Demux
 
-[查看 Practice 4](./P4)
+[查看 Practice 4](./practice4)
 
-將 P3 的 system 擴充為：
+將 Practice 3 的 system 擴充為 8-source / 8-destination：
 
 ```text
 src[7:0]
@@ -195,12 +273,12 @@ BL_Demux_1to8
 dst[7:0]
 ```
 
-Mux 與 Demux 皆以課程中的 **Behavior Level** 方式實作。
+Mux 與 Demux 皆以 **Behavior Level** 實作。
 
 ### Files
 
 ```text
-P4/
+practice4/
 ├── BL_Mux_8to1.v
 ├── BL_Demux_1to8.v
 ├── top_8.v
@@ -215,8 +293,7 @@ P4/
 
 [查看 Programmable Bit Router](./project)
 
-
-系統除了 Mux / Demux 外，再加入 `enable` 與 `invert` control：
+完成 Lab 原本內容後，另外設計一個小型 Project，將 Mux / Demux 與額外 control logic 組合成可程式化的 bit routing system。
 
 ```text
 src[7:0]
@@ -238,6 +315,11 @@ Demux_1to8
 dst[7:0]
 ```
 
+除了 `src_sel` 與 `dst_sel` 外，系統加入：
+
+- `enable`
+- `invert`
+
 主要 modules：
 
 ```text
@@ -247,33 +329,40 @@ Demux_1to8
 top_router
 ```
 
-此 Project 練習將 Lab 01 的概念應用到新的 Specification，並獨立完成：
+此 Project 用來練習從新的 Specification 自行完成：
 
-- Module Decomposition
-- Module Interface Design
-- Combinational Logic
-- Hierarchical Design
-- Verilog Implementation
-- Testbench
-- Waveform Verification
+> **Module Decomposition → Interface Design → Verilog → Testbench → Waveform Verification**
 
 ---
 
 ## Repository Structure
 
 ```text
-lab1/
+lab01/
 │
 ├── README.md
 │
-├── P3/
+├── example/
+│
+├── images/
+│   ├── q2_nand_or.png
+│   ├── q2_nand_xor.png
+│   ├── q2_nor_and.png
+│   ├── q2_nor_not.png
+│   ├── q2_nor_or.png
+│   ├── q3_mux_v1.png
+│   ├── q3_mux_v2.png
+│   ├── q3_demux_v1.png
+│   └── q3_demux_v2.png
+│
+├── practice3/
 │   ├── GL_Mux_4to1.v
 │   ├── Demux_1to2.v
 │   ├── CB_Demux_1to4.v
 │   ├── top_4.v
 │   └── testbench...
 │
-├── P4/
+├── practice4/
 │   ├── BL_Mux_8to1.v
 │   ├── BL_Demux_1to8.v
 │   ├── top_8.v
@@ -287,4 +376,3 @@ lab1/
     ├── top_router.v
     └── tb_top_router.v
 ```
-
