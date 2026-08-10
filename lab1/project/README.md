@@ -1,4 +1,4 @@
-# Lab 1 回家作業小 Project：可程式化位元路由器
+# Lab 1 Mini-Project：可程式化位元路由器
 
 ## 一、作業目的
 
