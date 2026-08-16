@@ -26,7 +26,7 @@
 | Lab | Topic | 主要內容 |
 |---|---|---|
 | [Lab 01](./lab01) | **Mux & Demux** | Logic Gate、Universal Gate、Mux、Demux、Gate Level / Behavioral Level、Hierarchical Design、Testbench |
-| Lab 02 | **Encoder & Decoder** | Encoder、Decoder、7-Segment Display、FPGA、LUT、IC Design Flow |
+| [Lab 02](./lab02) | **Encoder & Decoder** | Encoder、Priority Encoder、Decoder、7-Segment Display、Procedural Verilog、FPGA、LUT |
 | Lab 03 | **Adder** | Half Adder、Full Adder、Ripple Carry Adder、Carry Lookahead Adder、Signed Addition、Subtraction |
 | Lab 04 | **Sequential Circuits + Testbench** | Combinational / Sequential Circuit、Latch、Flip-Flop、Register、Counter、Clock、Testbench |
 | Lab 05 | **LED & Button** | RTL Design、Always Block、Blocking / Non-blocking、LED / Button Application |
@@ -72,12 +72,22 @@ ncku-logic-system-lab/
 │
 ├── README.md
 │
-└── lab01/
+├── lab01/
+│   ├── README.md
+│   ├── example/
+│   ├── images/
+│   ├── practice3/
+│   ├── practice4/
+│   └── project/
+│
+└── lab02/
     ├── README.md
     ├── example/
     ├── images/
+    ├── practice2/
     ├── practice3/
     ├── practice4/
+    ├── practice5/
     └── project/
 ```
 
