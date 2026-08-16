@@ -1,6 +1,6 @@
 # Logic System Lab
 
-我在這裡整理了 **邏輯系統實驗 (Logic System Lab)** 的 Verilog、Simulation、FPGA 實作與額外練習。
+我在這裡整理了 **邏輯系統實驗 (Logic System Lab)** 的作業實作與額外練習 (AI輔助統整)。
 
 主要內容涵蓋：
 
