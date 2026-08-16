@@ -129,9 +129,6 @@ end
 
 則在傳統 Verilog 中需要宣告為 `reg`。
 
-> `reg` 不代表一定會 synthesis 成 register。  
-> 是否產生 memory element 取決於所描述的 hardware behavior。
-
 ---
 
 ### `if / else`
