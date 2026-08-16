@@ -1,17 +1,16 @@
-# Lab 02 Mini-Project：可切換優先順序的請求顯示系統
+# Lab 02 Mini-Project — Dual-Mode Priority Keypad Display
 
 ## 一、作業目的
 
-本作業要求使用 Verilog 設計一個 **8-input Priority Request Display System**。
+設計一個 **16-key Priority Keypad Display System**。
 
-系統需要先根據 `mask` 與 `enable` 決定哪些 request 有效，再依照 `priority_mode` 選出 priority 最高的 request，最後將選中的編號輸出成 binary code，並顯示在 7-Segment Display 上。
+系統接收 `key[15:0]`，當一個或多個 key 被按下時，依照可切換的 priority 規則選出其中一個 key，並將其編號顯示在兩個 7-Segment Display 上。
 
-本作業主要整合 Lab 02 已學過的內容：
+本題希望整合 Lab 02 的主要內容：
 
 - Priority Encoder
 - Decoder
 - 7-Segment Display
-- Combinational Logic
 - `always @(*)`
 - `if / else`
 - `case`
@@ -22,293 +21,265 @@
 - Testbench
 - Waveform Verification
 
+整個系統維持 **Combinational Logic**，不使用 clock 或 sequential circuit。
+
 ---
 
-## 二、系統介面
+## 二、Top Module Interface
 
-Top module 名稱固定為：
+Top module 名稱：
 
 ```verilog
-top_priority_display
+top_keypad_display
 ```
 
-Port 定義如下：
+Port：
 
 ```verilog
-module top_priority_display (
-    input  [7:0] request,
-    input  [7:0] mask,
-    input        enable,
-    input        priority_mode,
-    output [2:0] selected,
-    output       valid,
-    output [6:0] seg
+module top_keypad_display (
+    input  [15:0] key,
+    input         enable,
+    input         priority_mode,
+    input         display_mode,
+    output [3:0]  code,
+    output        valid,
+    output [6:0]  seg_tens,
+    output [6:0]  seg_ones
 );
 ```
-
-> Module 名稱與 port 名稱請保持一致。
 
 ---
 
 ## 三、功能規格
 
-### 3.1 Request 與 Mask
+### 3.1 Priority Selection
 
-系統共有 8 個 request：
+`key[15:0]` 代表 16 個按鍵。
 
-```text
-request[7:0]
-```
-
-每個 request 都有對應的 `mask` bit：
-
-```text
-mask[7:0]
-```
-
-只有在：
-
-```text
-request[i] = 1
-mask[i]    = 1
-```
-
-時，該 request 才能參與 Priority Encoder 的判斷。
-
-例如：
-
-```text
-request = 8'b0010_1010
-mask    = 8'b1111_0011
-```
-
-則只有沒有被 mask 掉的 request 會進入後續 priority selection。
-
----
-
-### 3.2 Enable
-
-`enable` 控制整個系統是否啟用。
-
-```text
-enable = 0 → 系統停用
-enable = 1 → 正常進行 priority selection
-```
-
-當 `enable = 0` 時：
-
-```text
-valid    = 0
-selected = 3'b000
-seg      = 7'b1111111
-```
-
----
-
-### 3.3 Priority Mode
-
-`priority_mode` 用來決定 Priority Encoder 的優先方向。
+當多個 key 同時為 `1` 時，由 `priority_mode` 決定哪一個 key 被選中：
 
 ```text
 priority_mode = 0
-→ index 越大 priority 越高
+→ 高 index 優先
+→ key[15] > key[14] > ... > key[0]
 
 priority_mode = 1
-→ index 越小 priority 越高
+→ 低 index 優先
+→ key[0] > key[1] > ... > key[15]
+```
+
+被選中的 key index 輸出至：
+
+```text
+code[3:0]
 ```
 
 例如：
 
 ```text
-request = 8'b0010_1010
-mask    = 8'b1111_1111
-```
-
-active requests 為：
-
-```text
-request[5]
-request[3]
-request[1]
+key[12] = 1
+key[5]  = 1
+key[2]  = 1
 ```
 
 則：
 
 ```text
-priority_mode = 0 → selected = 5
-priority_mode = 1 → selected = 1
+priority_mode = 0 → code = 12
+priority_mode = 1 → code = 2
 ```
 
 ---
 
-### 3.4 Selected 與 Valid
+### 3.2 Valid / Enable
 
-`selected[2:0]` 輸出被選中的 request index。
+若至少有一個有效 key 被選中：
+
+```text
+valid = 1
+```
+
+若：
+
+```text
+key = 16'b0
+```
+
+或：
+
+```text
+enable = 0
+```
+
+則：
+
+```text
+valid = 0
+code  = 4'b0000
+```
+
+此時兩個 7-Segment Display 都必須 blank。
+
+Blank pattern：
+
+```text
+7'b1111111
+```
+
+---
+
+### 3.3 Display Mode
+
+`display_mode` 決定顯示方式。
+
+#### HEX Mode
+
+```text
+display_mode = 0
+```
+
+將 `code` 顯示為：
+
+```text
+0 ~ 9, A, b, c, d, E, F
+```
+
+只使用 `seg_ones`：
+
+```text
+seg_tens → blank
+seg_ones → HEX digit
+```
 
 例如：
 
 ```text
-request[6] 被選中
-→ selected = 3'd6
-```
-
-`valid` 表示目前是否存在有效 request：
-
-```text
-valid = 1 → 有 request 被選中
-valid = 0 → 沒有有效 request
-```
-
-當沒有有效 request 時：
-
-```text
-selected = 3'b000
+code = 12
+→ display = c
 ```
 
 ---
 
-### 3.5 7-Segment Output
-
-`seg[6:0]` 用來顯示 `selected` 的數字：
+#### Decimal Mode
 
 ```text
-0 ~ 7
+display_mode = 1
 ```
 
-使用與 Lab 02 相同的 **active-low 7-Segment pattern**：
+將 `code` 以十進位方式顯示：
 
 ```text
-0 → segment ON
-1 → segment OFF
+0 ~ 15
 ```
 
-當：
+例如：
 
 ```text
-valid = 0
+code = 7  → display = 7
+code = 12 → display = 12
+code = 15 → display = 15
 ```
 
-時，7-Segment Display 必須關閉：
+對於 `0 ~ 9`：
 
 ```text
-seg = 7'b1111111
+seg_tens → blank
+seg_ones → corresponding digit
+```
+
+對於 `10 ~ 15`：
+
+```text
+seg_tens → 1
+seg_ones → 0 ~ 5
 ```
 
 ---
 
-## 四、建議系統架構
+## 四、建議架構
 
-整體可以拆成：
+內部 module 如何拆分可以自行設計。
 
-```text
-request[7:0] ──┐
-               │
-mask[7:0] ─────┼──> Request Filter
-               │
-enable ────────┘
-                     │
-                     ▼
-              filtered_request
-                     │
-                     ▼
-             Priority Encoder
-                     │
-            selected + valid
-                     │
-                     ▼
-            7-Segment Decoder
-                     │
-                     ▼
-                  seg[6:0]
-```
-
-建議至少拆成以下 modules：
+一種可能的架構：
 
 ```text
-Request_Filter
-Priority_Encoder8
-Decoder_7S
-top_priority_display
+key[15:0]
+    │
+    ▼
+Priority Encoder
+    │
+    ├── code[3:0]
+    └── valid
+          │
+          ▼
+     Display Control
+       ┌──┴──┐
+       │     │
+     HEX   Decimal
+       │     │
+       └──┬──┘
+          │
+          ▼
+     7-Segment Output
 ```
 
-內部實作方式可以自行決定。
+不要求一定按照此架構實作，只要 top-level behavior 符合規格即可。
 
 ---
 
 ## 五、Testbench 要求
 
-請建立：
+建立：
 
 ```text
-tb_top_priority_display.v
+tb_top_keypad_display.v
 ```
 
-並對完整 system 進行 simulation。
+至少驗證：
 
-測試內容至少需涵蓋：
-
-- 沒有任何 active request
+- `key = 0`
 - `enable = 0`
-- 單一 active request
-- 多個 active requests，使用高 index priority
-- 多個 active requests，使用低 index priority
-- 高 priority request 被 `mask` 擋掉
-- `request[0]` 與 `request[7]` 的 boundary case
-- `selected` 是否正確
-- `valid` 是否正確
-- 7-Segment Display 是否顯示正確
-- `valid = 0` 時 display 是否 blank
+- 單一 key input
+- `key[0]`
+- `key[15]`
+- 多個 key 同時 active
+- High-index priority
+- Low-index priority
+- HEX mode 的 `0 ~ F`
+- Decimal mode 的 `0 ~ 15`
+- `9 → 10` 的 decimal boundary
+- `valid = 0` 時兩個 display 都 blank
 
-完成後需使用 simulation waveform 驗證輸出結果。
+最後使用 waveform 驗證完整 system behavior。
 
 ---
 
 ## 六、限制
 
-本題只需要使用 Lab 02 已學過的 combinational logic 概念。
+本題只使用 Lab 02 以前學過的 combinational logic 概念。
 
-不需要使用：
+不需要：
 
 - Clock
 - Flip-Flop
+- Register-based state
 - Sequential Logic
 - FSM
 
 ---
 
-## 七、建議檔案
-
-完成後 project 可以包含：
+## 七、建議 Project Structure
 
 ```text
-Request_Filter.v
-Priority_Encoder8.v
-Decoder_7S.v
-top_priority_display.v
-tb_top_priority_display.v
-README.md
+project/
+├── README.md
+├── Priority_Encoder16.v
+├── Display_Controller.v
+├── Decoder_7S.v
+├── top_keypad_display.v
+└── tb_top_keypad_display.v
 ```
 
-並附上最終 simulation waveform 截圖。
+檔名與內部 module 劃分可自行調整，只有 top module interface 建議保持一致。
 
----
-
-## 八、完成目標
-
-整體 data path 應能正確完成：
-
-```text
-request
-   ↓
-mask / enable
-   ↓
-priority selection
-   ↓
-selected + valid
-   ↓
-7-Segment Decoder
-   ↓
-display output
-```
-
-當 top-level Testbench 與 waveform 都能正確驗證上述功能，即完成此 Mini-Project。
+完成後加入 final simulation waveform。
