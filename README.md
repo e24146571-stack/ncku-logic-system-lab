@@ -1,6 +1,6 @@
 # Logic System Lab
 
-本 repository 整理 **邏輯系統實驗 (Logic System Lab)** 的 Verilog、Simulation、FPGA 實作與額外練習。
+我在這裡整理了 **邏輯系統實驗 (Logic System Lab)** 的 Verilog、Simulation、FPGA 實作與額外練習。
 
 主要內容涵蓋：
 
@@ -95,45 +95,8 @@ ncku-logic-system-lab/
 
 ---
 
-## Additional Projects
-
-### Lab 01 — Programmable Bit Router
-
-在 Lab 01 的 Mux、Demux 與 Hierarchical Design 基礎上，額外完成一個 **8-source to 8-destination programmable bit router**。
-
-```text
-src[7:0]
-   │
-   ▼
-Mux_8to1
-   │
-selected_bit
-   │
-   ▼
-Bit_Controller
-   │
-channel
-   │
-   ▼
-Demux_1to8
-   │
-   ▼
-dst[7:0]
-```
-
-除了 source / destination selection 外，系統另外加入：
-
-- `enable` — 控制訊號是否輸出
-- `invert` — 控制 selected bit 是否反相
-
-詳細內容請見 [Programmable Bit Router](./lab01/project)。
-
----
-
 ## Note
 
-本 repository 主要用於保存自行重新實作、整理與驗證的學習成果。
+在這裡主要用於保存自行重新實作、整理與驗證的學習成果。
 
-課程官方講義、原始完整結報及其他完整課程教材不收錄於此 repository。
-
-部分基礎 Verilog examples 依課堂內容重新整理，用於記錄不同描述方式與 hierarchical design 的基本概念。
+課程官方講義、原始完整結報及其他完整課程教材不收錄於此。
