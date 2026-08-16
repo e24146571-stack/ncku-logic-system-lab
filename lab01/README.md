@@ -1,6 +1,6 @@
 # Lab 01 — Mux & Demux
 
-本 Lab 從基本 **Logic Gate** 出發，進一步建立 Mux / Demux combinational circuit，並開始使用 Verilog 描述、組合與驗證 Digital Logic。
+Lab 01 從基本 **Logic Gate** 出發，進一步建立 Mux / Demux combinational circuit，並開始使用 Verilog 描述、組合與驗證 Digital Logic。
 
 > **Logic Gate → Mux / Demux → Verilog → Hierarchical Design → Testbench → Simulation**
 
@@ -289,7 +289,7 @@ Mux 與 Demux 皆以 **Behavior Level** 實作，並由 `top_8` 完成整體 mod
 
 [查看 Programmable Bit Router](./project)
 
-完成原本 Lab 內容後，另外設計一個小型 Project，將 Mux / Demux 與額外 control logic 組合成可程式化的 bit routing system。
+此 Additional Project 將 Mux / Demux 與額外 control logic 組合成可程式化的 bit routing system。
 
 ```text
 src[7:0]
@@ -324,10 +324,6 @@ Bit_Controller
 Demux_1to8
 top_router
 ```
-
-此 Project 用來練習從新的 Specification 自行完成：
-
-> **Module Decomposition → Interface Design → Verilog → Testbench → Waveform Verification**
 
 ### Simulation
 
