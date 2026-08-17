@@ -2,9 +2,9 @@
 
 Lab 02 延續 Lab 01 的 combinational logic design，進一步介紹 **Priority Encoder、7-Segment Decoder、Procedural Block 與 FPGA LUT implementation**。
 
-本 Lab 從 Encoder / Decoder 的 Boolean logic 出發，逐步進入較高階的 Verilog behavioral description，並透過 synthesis schematic 觀察 RTL 最後如何映射至 FPGA resources。
+本 Lab 從 Encoder / Decoder 的 Boolean logic 出發，逐步進入較高階的 Verilog behavioral description，並透過 simulation、hierarchical integration 與 synthesis schematic 觀察 RTL 如何映射至 FPGA resources。
 
-> **Truth Table → Encoder / Decoder → Procedural Verilog → Testbench → Integration → Synthesis → LUT → FPGA**
+> **Truth Table → Encoder / Decoder → Procedural Verilog → Testbench → Integration → Synthesis → LUT → Mini-Project**
 
 ---
 
@@ -14,16 +14,16 @@ Lab 02 延續 Lab 01 的 combinational logic design，進一步介紹 **Priority
 |---|---|
 | Logic | Encoder、Priority Encoder、Decoder、Don't Care、Boolean Simplification |
 | Display | BCD、7-Segment Display、Active-Low Segment Control |
-| Verilog | `always @(*)`、`reg` / `wire`、`if / else`、`case`、`for` loop、`localparam` |
-| Design | Combinational Logic、Hierarchical Design、Module Integration、Latch Avoidance |
-| Verification | Testbench、Exhaustive Test、Priority Verification、Waveform Analysis |
+| Verilog | `always @(*)`、`reg` / `wire`、`if / else`、`case`、`for` loop、`localparam`、Reduction Operator |
+| Design | Combinational Logic、Hierarchical Design、Module Integration、Latch Avoidance、Top-Level Glue Logic |
+| Verification | Testbench、Exhaustive Test、Priority Verification、Waveform、Self-Checking Testbench |
 | FPGA | XDC、Synthesis、Implementation、Bitstream、LUT、MUXF7 |
 
 ---
 
 ## Encoder & Decoder System
 
-本 Lab 的主要 system 可以整理為：
+本 Lab 的主要 combinational system 可以整理為：
 
 ```text
 Input Lines
@@ -32,7 +32,7 @@ Input Lines
 Priority Encoder
     │
     ▼
- BCD[3:0]
+ BCD / Code
     │
     ▼
 7-Segment Decoder
@@ -45,22 +45,25 @@ Priority Encoder
 
 一般 Encoder 將 active input 轉換為對應的 binary code。
 
-Priority Encoder 則進一步處理 **多個 input 同時 active** 的情況：
+Priority Encoder 則進一步處理 **多個 input 同時 active** 的情況，只輸出 priority 最高的 input 編號。
+
+例如：
 
 ```text
 in[9] > in[8] > ... > in[1]
 ```
 
-當多個輸入同時為 `1` 時，只輸出 priority 最高的 input 編號。
-
-例如：
+若：
 
 ```text
-in[9] = 0
 in[5] = 1
 in[2] = 1
+```
 
-→ BCD = 5
+則輸出：
+
+```text
+BCD = 5
 ```
 
 Truth table 中較低 priority 的 inputs 可以標示為 **don't care (`x`)**，因為它們已不再影響輸出。
@@ -81,18 +84,11 @@ BCD[3:0]
 out[6:0]
 ```
 
-本 Lab 的 Verilog implementation 使用 **active-low segment encoding**：
+本 Lab 使用 **active-low segment encoding**：
 
 ```text
 0 → segment ON
 1 → segment OFF
-```
-
-例如顯示 `0`：
-
-```text
-abcdefg
-0000001
 ```
 
 除了 Decimal `0~9` 外，也建立 `A、b、c、d、E、F` pattern，使單一 7-Segment Display 可以顯示完整 hexadecimal `0~F`。
@@ -129,6 +125,8 @@ end
 
 則在傳統 Verilog 中需要宣告為 `reg`。
 
+> `reg` 代表 signal 由 procedural block 賦值，不代表 synthesis 後一定會形成 register。
+
 ---
 
 ### `if / else`
@@ -143,17 +141,13 @@ else if (in[8])
 ...
 ```
 
-判斷順序本身直接表達：
-
-```text
-in[9] > in[8] > ...
-```
+判斷順序本身即可描述 priority。
 
 ---
 
 ### `case`
 
-Lookup / mapping 類型的 combinational logic 則適合使用 `case`：
+Lookup / mapping 類型的 combinational logic 適合使用 `case`：
 
 ```verilog
 case (BCD)
@@ -171,27 +165,25 @@ endcase
 
 Combinational `always @(*)` 中，每一條可能的 execution path 都必須對 output 賦值。
 
-例如：
+可以透過：
 
 ```verilog
-if (...)
-    out = ...;
 else
-    out = ...;
 ```
 
-或使用：
+或：
 
 ```verilog
-default:
-    out = ...;
+default
 ```
 
-若某些 input condition 沒有指定 output，hardware 必須保留 previous value，可能因此 infer **latch**。
+補齊所有輸入情況。
+
+若某些 condition 沒有指定 output，hardware 可能需要保留 previous value，進而 infer unintended latch。
 
 ---
 
-### Improving Code Readability
+### `localparam`
 
 七段顯示器的 bit patterns 使用 `localparam` 命名：
 
@@ -201,25 +193,13 @@ localparam S7_1 = 7'b1001111;
 ...
 ```
 
-相較於直接在 logic 中使用 binary constants：
-
-```verilog
-out = 7'b0000001;
-```
-
-使用：
-
-```verilog
-out = S7_0;
-```
-
-可讓 code 更容易閱讀與維護。
+相較於直接在 logic 中重複使用 binary constants，可提升 code readability。
 
 ---
 
 ## Lecture Examples
 
-課堂範例以相同的 0~6 Decoder function 示範不同 Verilog description styles。
+課堂範例以相同的 Decoder function 示範不同 Verilog description styles。
 
 | File | Method |
 |---|---|
@@ -234,8 +214,6 @@ out = S7_0;
 ## Practice 1 — Priority Encoder + 7-Segment Display
 
 Practice 1 使用 Tinkercad 建立 Priority Encoder、BCD Decoder 與 7-Segment Display circuit。
-
-主要流程：
 
 ```text
 Input
@@ -312,7 +290,7 @@ Testbench 使用 `for` loop 掃過所有 16 種 4-bit input，進行 exhaustive 
 15 → 15
 ```
 
-十位數使用 continuous assignment，個位數則使用 `always @(*) + if / else`，與 `Decoder_7S1` 採用不同的 Verilog description method。
+十位數使用 continuous assignment，個位數則使用 `always @(*) + if / else`。
 
 #### Simulation
 
@@ -361,7 +339,7 @@ Priority：
 in[9] > in[8] > ... > in[1]
 ```
 
-Testbench 除了測試 zero input 與 single active input，也刻意加入 multiple active inputs 驗證 priority behavior。
+Testbench 除了測試 zero input 與 single active input，也加入 multiple active inputs 驗證 priority behavior。
 
 #### Simulation
 
@@ -397,7 +375,7 @@ Waveform 驗證 zero input、single input，以及多個 input 同時 active 時
 
 [查看 Practice 4 Source Code](./practice4)
 
-Practice 4 將前面的 `Encoder_15` 與 `Decoder_7S2` 整合成完整 hierarchical system：
+Practice 4 將 `Encoder_15` 與 `Decoder_7S2` 整合成完整 hierarchical system：
 
 ```text
 in[15:1]
@@ -411,7 +389,6 @@ Encoder_15
 Decoder_7S2
     │
     ├── out_1[6:0]
-    │
     └── out_0[6:0]
 ```
 
@@ -448,7 +425,7 @@ Encoder / BCD verification：
 
 Practice 5 沿用 Practice 4 的 RTL design，加入 PYNQ-Z2 FPGA pin constraints。
 
-本資料夾僅保留：
+本資料夾保留：
 
 [`PYNQ-Z2 v1.0.xdc`](./practice5/PYNQ-Z2%20v1.0.xdc)
 
@@ -483,12 +460,6 @@ Top-Level Verilog Port
 Physical FPGA Pin
 ```
 
-本 Practice 將：
-
-- `in[15:1]` 對應至 external input pins
-- `BCD[3:0]` 對應至 onboard LEDs
-- `out_0[6:0]` 與 `out_1[6:0]` 對應至兩組 7-Segment control outputs
-
 ### Hardware Demo
 
 [Watch the FPGA Hardware Demo on YouTube](https://www.youtube.com/shorts/6mBTegdp79w)
@@ -497,22 +468,16 @@ Physical FPGA Pin
 
 ## FPGA LUT & Synthesis
 
-FPGA 並不是直接以固定 AND / OR / XOR gates 實現所有 combinational logic。
+FPGA combinational logic 主要使用 **LUT — Look-Up Table** 實現。
 
-主要 combinational resource 為：
-
-**LUT — Look-Up Table**
-
-LUT 可以視為一個 programmable truth table。
-
-Vivado Synthesis 會將 RTL function 進行 optimization，並映射至 FPGA 的 LUT / MUX resources。
+LUT 可以視為 programmable truth table，Vivado Synthesis 會將 RTL function 進行 Boolean optimization，並映射至 LUT / MUX resources。
 
 ### Synthesis Results
 
 | Design | Synthesis Mapping | Interpretation |
 |---|---|---|
 | 1:4 Demux | `4 × LUT3` | 每個 `dst[x]` 為一個 3-input Boolean function |
-| 8:1 Mux | `2 × LUT6 + MUXF7` | 兩個 4:1 Mux 後再以最高位 selector 選擇 |
+| 8:1 Mux | `2 × LUT6 + MUXF7` | 兩個 4:1 Mux 後再由最高位 selector 選擇 |
 | 1:8 Demux | `8 × LUT4` | 每個 `dst[x]` 為一個 4-input Boolean function |
 | Decoder_7S1 | `7 × LUT4` | 每個 segment output 為一個 4-input Boolean function |
 | Encoder_9 | Multi-Level LUT Network | 較複雜 output dependency 超過單一 LUT6 capacity |
@@ -544,7 +509,7 @@ dst[x] = f(channel, dst_sel[1:0])
 <img src="./images/q2_mux_8to1_schematic.png" width="100%">
 </a>
 
-8:1 Mux 被拆成：
+8:1 Mux 可拆成：
 
 ```text
 4:1 Mux ──┐
@@ -578,7 +543,7 @@ dst[x] = f(channel, dst_sel[2:0])
 <img src="./images/q2_decoder_7S1_schematic.png" width="100%">
 </a>
 
-Decoder 的七個 segment outputs 可以分別表示為：
+七個 segment outputs 分別為：
 
 ```text
 out[0] = f0(BCD[3:0])
@@ -598,7 +563,7 @@ out[6] = f6(BCD[3:0])
 
 Encoder_9 的四個 BCD output 具有不同的 input dependency：
 
-| Output | Approximate Dependency | Mapping |
+| Output | Dependency | Mapping |
 |---|---:|---|
 | `BCD[3]` | 2 inputs | LUT2 |
 | `BCD[2]` | 6 inputs | LUT6 |
@@ -611,28 +576,104 @@ Encoder_9 的四個 BCD output 具有不同的 input dependency：
 
 ---
 
-## Key Observations
+## Additional Project — Dual-Mode Priority Keypad Display
 
-本 Lab 可以看到同一個 combinational hardware function 能以不同 abstraction 描述：
+[查看 Dual-Mode Priority Keypad Display](./project)
+
+此 Mini-Project 將 Lab 02 的 Priority Encoder、7-Segment Decoder 與 hierarchical design 整合成一個較完整的 combinational system。
 
 ```text
-Truth Table
+key[15:0]
+priority_mode
     │
-    ├── Boolean Expression
-    ├── Continuous Assignment
-    ├── if / else
-    └── case
-          │
-          ▼
-       Synthesis
-          │
-          ▼
-      LUT Network
+    ▼
+Priority_Encoder16
+    │
+    ├── raw_code
+    └── raw_valid
+            │
+            ▼
+       Top + enable
+            │
+       code + valid
+            │
+            ▼
+        Decoder_7S
+      + display_mode
+            │
+      ┌─────┴─────┐
+      ▼           ▼
+  seg_tens     seg_ones
 ```
 
-因此 Verilog 的核心不在於指定每一顆實體 logic gate，而是正確描述所需的 **hardware behavior / function**。
+Project 加入：
 
-Synthesis tool 再根據 FPGA architecture 進行 Boolean optimization 與 resource mapping。
+- 16-key Priority Encoder
+- High-index / Low-index priority mode
+- `enable` / `valid` system control
+- HEX / Decimal display mode
+- Two-digit 7-Segment output
+- Reduction OR：`|key`
+- Top-level glue logic
+- Self-Checking Testbench
+
+### Verification
+
+此 Project 不使用大量 waveform 人工比對，而是由 Testbench 自動比較 actual output 與 expected output。
+
+測試涵蓋：
+
+```text
+No active key
+Enable disabled
+key[0] / key[15]
+Multiple active keys
+High / Low priority
+Single-key exhaustive test 0 ~ 15
+HEX / Decimal mode
+Decimal 9 → 10 boundary
+Decimal upper boundary 15
+```
+
+Final XSim simulation 中所有 test cases 皆顯示 `passed`。
+
+詳細設計與 verification 說明請見：
+
+[`project/README.md`](./project/README.md)
+
+---
+
+## Key Observations
+
+### RTL Description vs. FPGA Hardware
+
+同一個 combinational function 可以使用：
+
+```text
+Boolean Expression
+Continuous Assignment
+if / else
+case
+```
+
+等不同方式描述。
+
+Synthesis tool 會將 RTL behavior 轉換並最佳化為 FPGA 上的 LUT / MUX network，因此 RTL code 的寫法不一定直接對應到固定的 gate structure。
+
+### Valid Signal
+
+Mini-Project 中：
+
+```text
+key[0] 被選中 → code = 0, valid = 1
+沒有任何 key → code = 0, valid = 0
+```
+
+因此只看 `code` 無法區分「選到 key[0]」與「沒有有效輸入」，需要額外的 `valid` signal。
+
+### Verification
+
+較小的 Practice 適合直接閱讀 waveform；當 system complexity 增加後，可使用 **Self-Checking Testbench** 自動判斷 PASS / FAIL，將 waveform 保留作為 debug 與局部檢查工具。
 
 ---
 
@@ -642,6 +683,7 @@ Synthesis tool 再根據 FPGA architecture 進行 Boolean optimization 與 resou
 lab02/
 │
 ├── README.md
+│
 ├── example/
 │   ├── Decoder_v1.v
 │   ├── Decoder_v2.v
@@ -663,10 +705,32 @@ lab02/
 │   └── q2_encoder_9_schematic.png
 │
 ├── practice2/
+│   ├── Decoder_7S1.v
+│   ├── Decoder_7S2.v
+│   ├── tb_Decoder_7S1.v
+│   └── tb_Decoder_7S2.v
+│
 ├── practice3/
+│   ├── Encoder_9.v
+│   ├── Encoder_15.v
+│   ├── tb_Encoder_9.v
+│   └── tb_Encoder_15.v
+│
 ├── practice4/
-└── practice5/
-    └── PYNQ-Z2 v1.0.xdc
+│   ├── Encoder_15.v
+│   ├── Decoder_7S2.v
+│   ├── top_15_2.v
+│   └── tb_top_15_2.v
+│
+├── practice5/
+│   └── PYNQ-Z2 v1.0.xdc
+│
+└── project/
+    ├── README.md
+    ├── Priority_Encoder16.v
+    ├── Decoder_7S.v
+    ├── top_keypad_display.v
+    └── tb_top_keypad_display.v
 ```
 
 ---
