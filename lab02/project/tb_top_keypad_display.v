@@ -50,7 +50,7 @@ module tb_top_keypad_display;
         seg_ones = 1111111
         seg_tens = 1111111
         */
-        key = 16'b0000000000000001;
+        key = 16'b1000000000000000;
         enable = 1'b0;
         priority_mode = 1'b0;
         display_mode = 1'b0; 
