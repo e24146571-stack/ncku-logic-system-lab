@@ -1,39 +1,37 @@
 # Lab 02 Mini-Project — Dual-Mode Priority Keypad Display
 
-## 一、作業目的
+## 一、Project Overview
 
-設計一個 **16-key Priority Keypad Display System**。
+本 Mini-Project 使用 Verilog 實作一個 **16-key Priority Keypad Display System**。
 
-系統接收 `key[15:0]`，當一個或多個 key 被按下時，依照可切換的 priority 規則選出其中一個 key，並將其編號顯示在兩個 7-Segment Display 上。
+系統接收 `key[15:0]`，當一個或多個 key 同時 active 時，依照 `priority_mode` 選出 priority 最高的 key，並將其 index 輸出為 `code[3:0]`。
 
-本題希望整合 Lab 02 的主要內容：
+另外，系統可透過 `display_mode` 切換：
+
+- HEX mode：顯示 `0 ~ 9, A, b, c, d, E, F`
+- Decimal mode：顯示 `0 ~ 15`
+
+整個系統皆為 **Combinational Logic**，不使用 clock、Flip-Flop 或 FSM。
+
+本 Project 主要整合：
 
 - Priority Encoder
-- Decoder
-- 7-Segment Display
-- `always @(*)`
-- `if / else`
+- 7-Segment Decoder
+- Combinational `always @(*)`
+- `if / else if`
 - `case`
+- Reduction Operator
 - `wire` / `reg`
 - `localparam`
 - Module Instantiation
 - Hierarchical Design
-- Testbench
-- Waveform Verification
-
-整個系統維持 **Combinational Logic**，不使用 clock 或 sequential circuit。
+- Self-Checking Testbench
 
 ---
 
-## 二、Top Module Interface
+## 二、System Interface
 
-Top module 名稱：
-
-```verilog
-top_keypad_display
-```
-
-Port：
+Top module：
 
 ```verilog
 module top_keypad_display (
@@ -48,55 +46,77 @@ module top_keypad_display (
 );
 ```
 
+### Input
+
+| Signal | Description |
+|---|---|
+| `key[15:0]` | 16 個 request / key inputs |
+| `enable` | 控制整個 system 是否啟用 |
+| `priority_mode` | 切換 High-index / Low-index priority |
+| `display_mode` | 切換 HEX / Decimal display |
+
+### Output
+
+| Signal | Description |
+|---|---|
+| `code[3:0]` | 被選中的 key index |
+| `valid` | 是否存在有效的 selected key |
+| `seg_tens[6:0]` | 十位 7-Segment output |
+| `seg_ones[6:0]` | 個位 7-Segment output |
+
 ---
 
-## 三、功能規格
+## 三、System Behavior
 
-### 3.1 Priority Selection
+### Priority Selection
 
-`key[15:0]` 代表 16 個按鍵。
-
-當多個 key 同時為 `1` 時，由 `priority_mode` 決定哪一個 key 被選中：
+`priority_mode = 0`：
 
 ```text
-priority_mode = 0
-→ 高 index 優先
-→ key[15] > key[14] > ... > key[0]
-
-priority_mode = 1
-→ 低 index 優先
-→ key[0] > key[1] > ... > key[15]
+key[15] > key[14] > ... > key[0]
 ```
 
-被選中的 key index 輸出至：
+高 index 具有較高 priority。
+
+`priority_mode = 1`：
 
 ```text
-code[3:0]
+key[0] > key[1] > ... > key[15]
 ```
+
+低 index 具有較高 priority。
 
 例如：
 
 ```text
-key[12] = 1
-key[5]  = 1
-key[2]  = 1
+key[14] = 1
+key[7]  = 1
+key[4]  = 1
 ```
 
 則：
 
 ```text
-priority_mode = 0 → code = 12
-priority_mode = 1 → code = 2
+priority_mode = 0 → code = 14
+priority_mode = 1 → code = 4
 ```
 
 ---
 
-### 3.2 Valid / Enable
+### Enable and Valid
 
-若至少有一個有效 key 被選中：
+Priority Encoder 會另外產生 `raw_valid`：
+
+```verilog
+assign raw_valid = |key;
+```
+
+`|key` 為 reduction OR。
+
+只要 `key[15:0]` 中至少一個 bit 為 `1`：
 
 ```text
-valid = 1
+raw_valid = 1
 ```
 
 若：
@@ -105,181 +125,379 @@ valid = 1
 key = 16'b0
 ```
 
-或：
-
-```text
-enable = 0
-```
-
 則：
 
 ```text
-valid = 0
-code  = 4'b0000
+raw_valid = 0
 ```
 
-此時兩個 7-Segment Display 都必須 blank。
+Top module 再利用 `enable` 決定最終 system output：
 
-Blank pattern：
+```verilog
+assign code  = enable ? raw_code  : 4'd0;
+assign valid = enable ? raw_valid : 1'b0;
+```
+
+因此當 system disabled：
 
 ```text
-7'b1111111
+enable = 0
+
+→ code  = 0
+→ valid = 0
 ```
 
 ---
 
-### 3.3 Display Mode
+## 四、Display Modes
 
-`display_mode` 決定顯示方式。
-
-#### HEX Mode
+### HEX Mode
 
 ```text
 display_mode = 0
 ```
 
-將 `code` 顯示為：
+使用 `seg_ones` 顯示：
 
 ```text
 0 ~ 9, A, b, c, d, E, F
 ```
 
-只使用 `seg_ones`：
-
-```text
-seg_tens → blank
-seg_ones → HEX digit
-```
+`seg_tens` 保持 blank。
 
 例如：
 
 ```text
-code = 12
-→ display = c
+code = 11 → b
+code = 14 → E
+code = 15 → F
 ```
 
 ---
 
-#### Decimal Mode
+### Decimal Mode
 
 ```text
 display_mode = 1
 ```
 
-將 `code` 以十進位方式顯示：
+將 `code` 顯示為十進位：
 
 ```text
 0 ~ 15
 ```
 
-例如：
+當：
 
 ```text
-code = 7  → display = 7
-code = 12 → display = 12
-code = 15 → display = 15
+code = 0 ~ 9
 ```
 
-對於 `0 ~ 9`：
+只使用 `seg_ones`：
 
 ```text
-seg_tens → blank
-seg_ones → corresponding digit
+7 → 7
+9 → 9
 ```
 
-對於 `10 ~ 15`：
+當：
 
 ```text
-seg_tens → 1
-seg_ones → 0 ~ 5
+code = 10 ~ 15
+```
+
+使用兩個 7-Segment outputs：
+
+```text
+10 → 10
+12 → 12
+15 → 15
+```
+
+本 Project 使用 active-low 7-Segment pattern：
+
+```text
+0 → segment ON
+1 → segment OFF
+```
+
+Blank pattern：
+
+```verilog
+7'b1111111
 ```
 
 ---
 
-## 四、建議架構
+## 五、Architecture
 
-內部 module 如何拆分可以自行設計。
-
-一種可能的架構：
+最終實作採用以下架構：
 
 ```text
 key[15:0]
+priority_mode
     │
     ▼
-Priority Encoder
+Priority_Encoder16
     │
-    ├── code[3:0]
-    └── valid
-          │
-          ▼
-     Display Control
-       ┌──┴──┐
-       │     │
-     HEX   Decimal
-       │     │
-       └──┬──┘
-          │
-          ▼
-     7-Segment Output
+    ├── raw_code[3:0]
+    └── raw_valid
+            │
+            ▼
+       Top-Level Control
+          + enable
+            │
+            ├── code[3:0]
+            └── valid
+                  │
+                  ▼
+              Decoder_7S
+             + display_mode
+                  │
+          ┌───────┴───────┐
+          ▼               ▼
+      seg_tens         seg_ones
 ```
 
-不要求一定按照此架構實作，只要 top-level behavior 符合規格即可。
+### `Priority_Encoder16`
+
+負責：
+
+- 判斷 active keys
+- 根據 `priority_mode` 選出 highest-priority key
+- 輸出 `raw_code`
+- 利用 reduction OR 產生 `raw_valid`
+
+Source：
+
+[`Priority_Encoder16.v`](./Priority_Encoder16.v)
 
 ---
 
-## 五、Testbench 要求
+### `top_keypad_display`
 
-建立：
+負責：
+
+- Module Integration
+- 接收 Encoder 的 `raw_code` / `raw_valid`
+- 使用 `enable` 控制最終 `code` / `valid`
+- 將結果送入 Decoder
+
+Source：
+
+[`top_keypad_display.v`](./top_keypad_display.v)
+
+---
+
+### `Decoder_7S`
+
+負責：
+
+- 根據 `valid` 決定 display 是否 blank
+- 根據 `display_mode` 選擇 HEX / Decimal mode
+- 將 `code` 轉換為兩組 active-low 7-Segment outputs
+
+Source：
+
+[`Decoder_7S.v`](./Decoder_7S.v)
+
+---
+
+## 六、Verification
+
+本 Project 使用 **Self-Checking Testbench** 進行驗證。
+
+與單純輸入 stimulus 後人工閱讀 waveform 不同，Testbench 會直接比較：
 
 ```text
-tb_top_keypad_display.v
+Actual Output
+     vs.
+Expected Output
 ```
 
-至少驗證：
+並在 XSim console 輸出：
 
-- `key = 0`
+```text
+passed
+```
+
+或：
+
+```text
+failed
+```
+
+Testbench：
+
+[`tb_top_keypad_display.v`](./tb_top_keypad_display.v)
+
+### Test Coverage
+
+測試內容包含：
+
+- No active key
 - `enable = 0`
-- 單一 key input
+- Single active key
 - `key[0]`
 - `key[15]`
-- 多個 key 同時 active
+- Multiple active keys
 - High-index priority
 - Low-index priority
-- HEX mode 的 `0 ~ F`
-- Decimal mode 的 `0 ~ 15`
-- `9 → 10` 的 decimal boundary
-- `valid = 0` 時兩個 display 都 blank
+- Exhaustive single-key test：`key[0] ~ key[15]`
+- HEX mode
+- Decimal mode
+- Decimal `9 → 10` boundary
+- Decimal upper boundary `15`
+- Blank display when `valid = 0`
 
-最後使用 waveform 驗證完整 system behavior。
+Single-key test 使用 `for` loop 依序驗證：
+
+```text
+key[0]  → code = 0
+key[1]  → code = 1
+...
+key[15] → code = 15
+```
+
+### Simulation Result
+
+Final XSim simulation：
+
+```text
+test 1 passed
+test 2 passed
+test 3 passed
+test 4 passed
+test 5 passed
+test 6 passed
+test 7 passed
+test 8 passed
+
+(test 9) single key 0 passed
+...
+(test 9) single key 15 passed
+
+(test 10) single key 0 passed
+...
+(test 10) single key 15 passed
+
+test 11 passed
+test 12 passed
+test 13 passed
+```
+
+所有測試皆通過。
+
+本 Project 主要使用 **self-checking console output** 作為 verification result，因此未另外保存完整 waveform screenshot。
 
 ---
 
-## 六、限制
+## 七、Key Observations
 
-本題只使用 Lab 02 以前學過的 combinational logic 概念。
+### `code = 0` 不代表沒有有效輸入
 
-不需要：
+`key[0]` 被選中時：
 
-- Clock
-- Flip-Flop
-- Register-based state
-- Sequential Logic
-- FSM
+```text
+code = 0
+valid = 1
+```
+
+沒有任何 key active 時：
+
+```text
+code = 0
+valid = 0
+```
+
+因此 `code` 本身不足以判斷是否存在有效 input，需要額外的 `valid` signal。
 
 ---
 
-## 七、建議 Project Structure
+### Top Module 可以包含 Glue Logic
+
+Top module 不只負責 Module Instantiation，也可以處理少量 system-level control。
+
+本 Project 中：
+
+```text
+Priority Encoder
+→ raw_code / raw_valid
+
+Top + enable
+→ code / valid
+```
+
+`enable` 屬於整個 system 的控制，因此放在 Top 中處理。
+
+---
+
+### Procedural Code 仍然是在描述 Hardware
+
+在同一個 combinational `always @(*)` block 中，procedural statements 具有執行順序。
+
+例如：
+
+```verilog
+always @(*) begin
+    code = 4'd0;
+
+    if (condition)
+        code = 4'd5;
+end
+```
+
+simulation 中後面的 assignment 可以覆寫前面的 default value。
+
+Synthesis 最終仍會建立具有相同行為的 combinational hardware，而不是建立一個逐行執行程式碼的 processor。
+
+---
+
+### Self-Checking Testbench
+
+隨著 system complexity 增加，只依靠 waveform 人工檢查會逐漸變得低效率。
+
+本 Project 開始使用：
+
+```text
+Stimulus
+   ↓
+DUT
+   ↓
+Automatic Comparison
+   ↓
+PASS / FAIL
+```
+
+waveform 可保留作為 debug 工具，而大量 functional verification 可以交由 Testbench 自動判斷。
+
+---
+
+## 八、Project Structure
 
 ```text
 project/
+│
 ├── README.md
 ├── Priority_Encoder16.v
-├── Display_Controller.v
 ├── Decoder_7S.v
 ├── top_keypad_display.v
 └── tb_top_keypad_display.v
 ```
 
-檔名與內部 module 劃分可自行調整，只有 top module interface 建議保持一致。
+---
 
-完成後加入 final simulation waveform。
+## 九、Result
+
+本 Mini-Project 完成：
+
+- 16-key Priority Encoder
+- Configurable High / Low Priority
+- Enable / Valid Control
+- HEX / Decimal Display Mode
+- Two-Digit 7-Segment Output
+- Hierarchical Design
+- Self-Checking Testbench
+- Exhaustive Single-Key Verification
+
+Final simulation passed all defined test cases.
