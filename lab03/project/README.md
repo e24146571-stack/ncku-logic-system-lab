@@ -1,81 +1,87 @@
 # Lab 03 Mini-Project — 8-bit Saturating Arithmetic Unit
 
-## Overview
+## 專案說明
 
-This mini-project extends the arithmetic concepts from Lab03 into an
-**8-bit signed Saturating Arithmetic Unit**.
+本 Mini-Project 延伸 Lab03 的 Adder、Signed Addition、Subtraction 與 Overflow Detection，設計一個 **8-bit signed Saturating Arithmetic Unit**。
 
-The design supports:
+系統支援：
 
-- Signed addition and subtraction
-- Signed overflow detection
-- Wrap-around arithmetic
-- Saturating arithmetic
-- `zero` and `negative` status flags
+- Signed Addition / Subtraction
+- Signed Overflow Detection
+- Wrap-around Arithmetic
+- Saturating Arithmetic
+- `zero` / `negative` Status Flags
 
-The entire design is implemented using **combinational logic**.
+整體設計皆為 **Combinational Logic**，不使用 Clock、Flip-Flop、Register 或 FSM。
 
 ---
 
-## Function
+## 功能說明
 
 ### Arithmetic Operation
 
-`OP` selects the arithmetic operation:
+`OP` 用來選擇運算模式：
 
 ```text
 OP = 0 → A + B
 OP = 1 → A - B
 ```
 
-Addition and subtraction share the same arithmetic datapath.
+Addition 與 Subtraction 共用同一組 arithmetic datapath。
 
-For subtraction:
+Subtraction 利用 two's complement：
 
 ```text
-B_in = B XOR OP
+B_in      = B XOR OP
 raw_result = A + B_in + OP
+```
+
+因此：
+
+```text
+OP = 0 → B_in = B  → A + B
+OP = 1 → B_in = ~B → A + ~B + 1 = A - B
 ```
 
 ---
 
 ### Saturation Mode
 
-`sat_enable` controls how signed overflow is handled.
+`sat_enable` 用來決定 Overflow 發生時的處理方式：
 
 ```text
-sat_enable = 0 → Wrap-around mode
-sat_enable = 1 → Saturation mode
+sat_enable = 0 → Wrap-around Mode
+sat_enable = 1 → Saturation Mode
 ```
 
-When saturation is enabled:
+當 `sat_enable = 0` 時，保留一般 8-bit two's complement 的 wrap-around result。
+
+當 `sat_enable = 1` 且發生 signed overflow 時：
 
 ```text
-Positive overflow → result = +127 (0111_1111)
-Negative overflow → result = -128 (1000_0000)
+Positive Overflow → result = +127 = 8'b0111_1111
+Negative Overflow → result = -128 = 8'b1000_0000
 ```
-
-When saturation is disabled, the original 8-bit wrap-around result is preserved.
 
 ---
 
 ## Status Flags
 
-The design provides four status outputs:
-
-| Signal | Description |
+| Signal | 說明 |
 |---|---|
-| `overflow` | Original signed arithmetic operation exceeds the 8-bit signed range |
-| `saturated` | Saturation was actually applied |
-| `zero` | Final result is zero |
-| `negative` | Final result is negative |
+| `overflow` | 原始 signed arithmetic operation 是否超出 8-bit signed range |
+| `saturated` | 最終輸出是否實際經過 saturation |
+| `zero` | 最終 `result` 是否為 0 |
+| `negative` | 最終 `result` 是否為負數 |
 
-`overflow` represents the original arithmetic result, while `zero` and
-`negative` are determined from the final output after saturation control.
+其中：
+
+- `overflow` 反映的是 saturation 前的原始 arithmetic result。
+- `zero` 與 `negative` 則根據 saturation 後的最終 `result` 判斷。
 
 ---
 
-## Architecture
+## 系統架構
 
 ```text
       A, B, OP
@@ -108,21 +114,31 @@ The design provides four status outputs:
  └────────────────────┘
 ```
 
-### Module Responsibilities
+### Module 分工
 
-- `Arithmetic_Unit_8.v`
-  - Performs signed addition / subtraction
-  - Generates the raw 8-bit result
-  - Detects signed overflow
+#### `Arithmetic_Unit_8.v`
 
-- `Saturation_Control_8.v`
-  - Selects between wrap-around and saturation behavior
-  - Clamps overflow results to `+127` or `-128`
-  - Generates the `saturated` flag
+負責：
 
-- `Saturating_ALU_8.v`
-  - Top-level integration
-  - Generates `zero` and `negative` flags
+- Signed Addition / Subtraction
+- 產生 `raw_result`
+- Signed Overflow Detection
+
+#### `Saturation_Control_8.v`
+
+負責：
+
+- Wrap-around / Saturation Mode 選擇
+- Positive / Negative Overflow 的飽和處理
+- 產生 `saturated`
+
+#### `Saturating_ALU_8.v`
+
+Top module，負責：
+
+- 整合 `Arithmetic_Unit_8`
+- 整合 `Saturation_Control_8`
+- 根據最終 `result` 產生 `zero` 與 `negative`
 
 ---
 
@@ -141,19 +157,22 @@ project/
 
 ## Verification
 
-A self-checking testbench was used to verify:
+使用 **self-checking Testbench** 驗證完整系統功能。
 
-- Normal signed addition
-- Normal signed subtraction
-- Positive and negative overflow
-- Wrap-around behavior
-- Positive and negative saturation
+測試內容包含：
+
+- Normal Signed Addition
+- Normal Signed Subtraction
+- Positive / Negative Overflow
+- Wrap-around Mode
+- Saturation Mode
+- Positive / Negative Saturation
 - `overflow`
 - `saturated`
 - `zero`
 - `negative`
 
-Representative boundary cases include:
+其中包含代表性的 boundary cases：
 
 ```text
 +127 + 1
@@ -162,13 +181,20 @@ Representative boundary cases include:
 -128 - 1
 ```
 
-Both saturation-enabled and saturation-disabled overflow cases were tested.
+Overflow cases 皆分別測試：
+
+```text
+sat_enable = 0
+sat_enable = 1
+```
+
+以確認 Wrap-around 與 Saturation behavior 都正確。
 
 ---
 
 ## Result
 
-All implemented test cases passed in XSim:
+XSim self-checking simulation 結果：
 
 ```text
 test 1-1 passed
@@ -190,5 +216,6 @@ test 4-3 passed
 test 4-4 passed
 ```
 
-The final design successfully implements an 8-bit signed arithmetic datapath
-with optional saturation and status flag generation.
+所有設定的 test cases 皆通過。
+
+本 Mini-Project 完成了從 Lab03 基本 Add/Sub datapath 延伸至具備 **signed overflow handling、optional saturation 與 status flags** 的完整 combinational arithmetic unit。
