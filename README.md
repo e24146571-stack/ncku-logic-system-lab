@@ -1,6 +1,6 @@
 # Logic System Lab
 
-我在這裡整理了 **邏輯系統實驗 (Logic System Lab)** 的作業實作與額外練習 (AI輔助統整)。
+我在這裡整理了 **邏輯系統實驗 (Logic System Lab)** 的作業實作、課程重點與額外練習（AI 輔助統整）。
 
 主要內容涵蓋：
 
@@ -27,7 +27,7 @@
 |---|---|---|
 | [Lab 01](./lab01) | **Mux & Demux** | Logic Gate、Universal Gate、Mux、Demux、Gate Level / Behavioral Level、Hierarchical Design、Testbench |
 | [Lab 02](./lab02) | **Encoder & Decoder** | Encoder、Priority Encoder、Decoder、7-Segment Display、Procedural Verilog、FPGA、LUT |
-| Lab 03 | **Adder** | Half Adder、Full Adder、Ripple Carry Adder、Carry Lookahead Adder、Signed Addition、Subtraction |
+| [Lab 03](./lab03) | **Adder** | Half Adder、Full Adder、Ripple Carry Adder、Carry Lookahead Adder、Signed Arithmetic、Overflow、Add/Sub、FPGA Synthesis |
 | Lab 04 | **Sequential Circuits + Testbench** | Combinational / Sequential Circuit、Latch、Flip-Flop、Register、Counter、Clock、Testbench |
 | Lab 05 | **LED & Button** | RTL Design、Always Block、Blocking / Non-blocking、LED / Button Application |
 | Lab 06 | **LED & PWM** | Timer、Application Circuit、LED Control、PWM |
@@ -80,14 +80,23 @@ ncku-logic-system-lab/
 │   ├── practice4/
 │   └── project/
 │
-└── lab02/
+├── lab02/
+│   ├── README.md
+│   ├── example/
+│   ├── images/
+│   ├── practice2/
+│   ├── practice3/
+│   ├── practice4/
+│   ├── practice5/
+│   └── project/
+│
+└── lab03/
     ├── README.md
-    ├── example/
     ├── images/
+    ├── practice1/
     ├── practice2/
     ├── practice3/
     ├── practice4/
-    ├── practice5/
     └── project/
 ```
 
@@ -98,6 +107,7 @@ ncku-logic-system-lab/
 - Simulation waveform
 - Circuit / Architecture diagrams
 - FPGA constraint files (`.xdc`) when applicable
+- Synthesis / implementation observations
 - Design and verification notes
 - Additional Project
 
@@ -107,6 +117,6 @@ ncku-logic-system-lab/
 
 ## Note
 
-在這裡主要用於保存自行重新實作、整理與驗證的學習成果。
+這裡主要用於保存自行重新實作、整理與驗證的學習成果，並作為 Verilog、Digital Logic 與 FPGA 基礎的複習紀錄。
 
 課程官方講義、原始完整結報及其他完整課程教材不收錄於此。
